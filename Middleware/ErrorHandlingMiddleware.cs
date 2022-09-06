@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using MiddleWareApp.Model;
+using Microsoft.EntityFrameworkCore;
+using MiddleWareApp.Data;
 
 namespace MiddleWareApp.Middleware
 {
@@ -8,17 +11,45 @@ namespace MiddleWareApp.Middleware
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
+        
 
         public ErrorHandlingMiddleware(RequestDelegate next)
         {
             _next = next;
+            
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext httpContext, MiddleWareAppContext db)
+        {
+            // LogErrorToDatabase();
+           
+
+            try
+            {
+                await _next(httpContext);
+            }
+            catch (Exception ex)
+            {
+                await LogErrorAsync(ex,db);
+            }
+           
+        }
+
+        public async Task LogErrorAsync(Exception ex,MiddleWareAppContext db)
         {
 
-            return _next(httpContext);
+            db.Add(
+                new ErrorModel()
+                {
+                    ErrorName = "name",
+                    ErrorDescription = "Description",
+                    ErrorType = "Type",
+                    ApiId = "123frt"
+                }
+                );
+           await db.SaveChangesAsync();
         }
+
     }
 
     // Extension method used to add the middleware to the HTTP request pipeline.

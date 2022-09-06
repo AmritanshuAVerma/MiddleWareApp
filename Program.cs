@@ -1,7 +1,14 @@
 using MiddleWareApp.Controllers;
 using MiddleWareApp.Middleware;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MiddleWareApp.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<MiddleWareAppContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MiddleWareAppContext") ?? 
+    throw new InvalidOperationException("Connection string 'MiddleWareAppContext' not found.")));
 
 // Add services to the container.
 
@@ -17,6 +24,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseExceptionHandler("/error");
 }
 
 app.UseErrorHandlingMiddleware();
