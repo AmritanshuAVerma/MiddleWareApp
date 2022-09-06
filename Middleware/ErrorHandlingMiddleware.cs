@@ -30,21 +30,21 @@ namespace MiddleWareApp.Middleware
             }
             catch (Exception ex)
             {
-                await LogErrorAsync(ex,db);
+                await LogErrorAsync(ex,db,httpContext);
             }
            
         }
 
-        public async Task LogErrorAsync(Exception ex,MiddleWareAppContext db)
+        public async Task LogErrorAsync(Exception ex,MiddleWareAppContext db, HttpContext hc)
         {
 
             db.Add(
                 new ErrorModel()
                 {
-                    ErrorName = "name",
-                    ErrorDescription = "Description",
-                    ErrorType = "Type",
-                    ApiId = "123frt"
+                    ErrorName = ex.Message,
+                    ErrorDescription = ex.Source,
+                    ErrorType = "ApiError",
+                    ApiId = hc.Connection.Id
                 }
                 );
            await db.SaveChangesAsync();
